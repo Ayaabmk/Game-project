@@ -21,13 +21,12 @@ Vole entre les tuyaux, enchaîne les passages **parfaits** et bats ton record.
 ## Structure
 
 ```
-www/                  le jeu (c'est ce dossier qui est publié)
-  index.html          page et menus
-  style.css           style des menus
-  game.js             moteur du jeu (physique, rendu, sons, sauvegarde)
-  manifest.webmanifest  infos pour l'installer comme une appli
-  sw.js               service worker : fonctionne hors ligne
-  icons/              icônes de l'appli
+index.html            page et menus
+style.css             style des menus
+game.js               moteur du jeu (physique, rendu, sons, sauvegarde)
+manifest.webmanifest  infos pour l'installer comme une appli
+sw.js                 service worker : fonctionne hors ligne
+icons/                icônes de l'appli
 tools/make-icons.mjs  régénère les icônes PNG depuis icons/icon.svg
 .github/workflows/deploy.yml  déploiement automatique sur GitHub Pages
 ```
@@ -37,7 +36,6 @@ Aucune dépendance, aucun build : c'est du HTML/CSS/JavaScript pur.
 ## Jouer en local
 
 ```bash
-cd www
 python3 -m http.server 8000
 ```
 
@@ -46,9 +44,9 @@ Puis ouvre http://localhost:8000.
 ## Déployer (gratuit) avec GitHub Pages
 
 1. Sur GitHub, va dans **Settings → Pages**.
-2. Dans **Source**, choisis **GitHub Actions**.
-3. Pousse sur la branche `main` : le jeu est publié automatiquement sur
-   `https://<ton-pseudo>.github.io/Game-project/`.
+2. Dans **Source**, choisis **GitHub Actions** (ou « Deploy from a branch », `main`, `/ (root)` :
+   les deux fonctionnent, le jeu est à la racine).
+3. Le jeu est publié sur `https://<ton-pseudo>.github.io/Game-project/`.
 
 ## L'installer sur le téléphone
 
@@ -61,9 +59,10 @@ Le jeu s'ouvre alors en plein écran, comme une vraie appli, et marche hors lign
 
 ## Aller plus loin : Play Store / App Store
 
-Le dossier `www/` peut être empaqueté en appli native avec [Capacitor](https://capacitorjs.com/) :
+Le jeu peut être empaqueté en appli native avec [Capacitor](https://capacitorjs.com/) :
 
 ```bash
+mkdir www && cp -r index.html game.js style.css sw.js manifest.webmanifest icons www/
 npm init -y
 npm install @capacitor/core @capacitor/cli @capacitor/android
 npx cap init "Floppy Bird" com.tonnom.floppybird --web-dir www
@@ -75,6 +74,6 @@ npx cap open android   # ouvre Android Studio pour générer l'APK / l'AAB
 
 ## Régler la difficulté
 
-Tout est en haut de `www/game.js`, dans l'objet `CFG` : gravité, force du battement,
+Tout est en haut de `game.js`, dans l'objet `CFG` : gravité, force du battement,
 vitesse, taille des trous, etc. Après une modification, change `VERSION` dans
-`www/sw.js` pour que les téléphones récupèrent la nouvelle version.
+`sw.js` pour que les téléphones récupèrent la nouvelle version.
