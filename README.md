@@ -28,7 +28,6 @@ manifest.webmanifest  infos pour l'installer comme une appli
 sw.js                 service worker : fonctionne hors ligne
 icons/                icônes de l'appli
 tools/make-icons.mjs  régénère les icônes PNG depuis icons/icon.svg
-.github/workflows/deploy.yml  déploiement automatique sur GitHub Pages
 ```
 
 Aucune dépendance, aucun build : c'est du HTML/CSS/JavaScript pur.
@@ -44,9 +43,8 @@ Puis ouvre http://localhost:8000.
 ## Déployer (gratuit) avec GitHub Pages
 
 1. Sur GitHub, va dans **Settings → Pages**.
-2. Dans **Source**, choisis **GitHub Actions** (ou « Deploy from a branch », `main`, `/ (root)` :
-   les deux fonctionnent, le jeu est à la racine).
-3. Le jeu est publié sur `https://<ton-pseudo>.github.io/Game-project/`.
+2. Dans **Source**, choisis **Deploy from a branch**, branche `main`, dossier `/ (root)`.
+3. À chaque push sur `main`, le jeu est republié sur `https://<ton-pseudo>.github.io/Game-project/`.
 
 ## L'installer sur le téléphone
 
