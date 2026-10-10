@@ -141,8 +141,74 @@
       this.tone(base * 1.26, base * 1.26, 0.06, 'square', 0.06, 0.05);
       this.tone(base * 1.5, base * 1.5, 0.14, 'square', 0.06, 0.1);
     },
-    hit() { this.noise(0.25, 0.4); this.tone(220, 55, 0.35, 'sawtooth', 0.12); },
-    fall() { this.tone(600, 120, 0.45, 'triangle', 0.08, 0.1); },
+    hit() { this.noise(0.12, 0.25); },
+    // Prout de défaite : un grondement grave qui "flotte" (vibrato + battement)
+    // et descend, filtré pour rester sourd, avec un peu de souffle par-dessus.
+    fart() {
+      if (this.muted || !this.ctx) return;
+      const c = this.ctx;
+      const t0 = c.currentTime + 0.06;
+      const dur = rand(0.55, 0.85);
+      const end = t0 + dur;
+
+      const out = c.createGain();
+      out.gain.setValueAtTime(0.0001, t0);
+      out.gain.exponentialRampToValueAtTime(0.55, t0 + 0.03);
+      out.gain.setValueAtTime(0.55, t0 + dur * 0.55);
+      out.gain.exponentialRampToValueAtTime(0.0001, end);
+
+      const filter = c.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.Q.value = 4;
+      filter.frequency.setValueAtTime(750, t0);
+      filter.frequency.exponentialRampToValueAtTime(220, end);
+      filter.connect(out).connect(c.destination);
+
+      // Le "moteur" du prout : une dent de scie grave qui descend.
+      const osc = c.createOscillator();
+      osc.type = 'sawtooth';
+      const f0 = rand(85, 115);
+      osc.frequency.setValueAtTime(f0, t0);
+      osc.frequency.exponentialRampToValueAtTime(f0 * 0.5, end);
+
+      // Vibrato irrégulier.
+      const wobble = c.createOscillator();
+      const wobbleDepth = c.createGain();
+      wobble.frequency.value = rand(12, 20);
+      wobbleDepth.gain.value = 20;
+      wobble.connect(wobbleDepth).connect(osc.frequency);
+
+      // Battement rapide du volume : c'est lui qui fait "brrrt".
+      const flutterAmp = c.createGain();
+      flutterAmp.gain.value = 0.6;
+      const flutter = c.createOscillator();
+      const flutterDepth = c.createGain();
+      flutter.type = 'square';
+      flutter.frequency.value = rand(24, 34);
+      flutterDepth.gain.value = 0.45;
+      flutter.connect(flutterDepth).connect(flutterAmp.gain);
+      osc.connect(flutterAmp).connect(filter);
+
+      // Souffle.
+      const len = Math.floor(c.sampleRate * dur);
+      const buf = c.createBuffer(1, len, c.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+      const air = c.createBufferSource();
+      const airFilter = c.createBiquadFilter();
+      const airGain = c.createGain();
+      air.buffer = buf;
+      airFilter.type = 'bandpass';
+      airFilter.frequency.value = 180;
+      airFilter.Q.value = 1.5;
+      airGain.gain.value = 0.35;
+      air.connect(airFilter).connect(airGain).connect(filter);
+
+      for (const node of [osc, wobble, flutter, air]) {
+        node.start(t0);
+        node.stop(end + 0.05);
+      }
+    },
     record() { [523, 659, 784, 1047].forEach((f, i) => this.tone(f, f, 0.14, 'square', 0.06, i * 0.1)); },
     click() { this.tone(700, 500, 0.05, 'triangle', 0.08); },
   };
@@ -323,7 +389,7 @@
     flash = 0.7;
     deadTimer = 0;
     Sound.hit();
-    Sound.fall();
+    Sound.fart();
     vibrate([60, 40, 90]);
     burst(CFG.birdX, bird.y, 22, ['#ffffff', SKINS[skinIndex].wing === '#ffffff' ? '#ff80ab' : SKINS[skinIndex].wing], 260);
     bird.vy = Math.min(bird.vy, -150);

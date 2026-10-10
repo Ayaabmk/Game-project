@@ -1,6 +1,6 @@
 // Service worker : met le jeu en cache pour qu'il fonctionne hors ligne.
 // Pense à changer VERSION à chaque mise à jour pour forcer le rafraîchissement.
-const VERSION = 'floppy-v2';
+const VERSION = 'floppy-v3';
 const ASSETS = [
   './',
   './index.html',
